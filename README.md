@@ -1,13 +1,13 @@
 ## Security Camera
 
-## :package: Download and Setup
+### :package: Download and Setup
 1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository to your own GitHub account and then [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device. <br /> 
 `$ git clone https://github.com/devincapriola/Security-Camera.git`
 
-## Quick Start
-1. install the requirements. <br /> 
+2. install the requirements. <br /> 
 `$ python -m pip install -r requirements.txt`
-2. running the app. <br /> 
+
+3. running the camera. <br /> 
 `$ python main.py`
 
 ### :handshake: Contributing
