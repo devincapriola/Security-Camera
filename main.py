@@ -1,34 +1,51 @@
+# Security Camera with Face Detection
+# Importing the Libraries
 import cv2
 import time
 import datetime
 
-cap = cv2.VideoCapture(0)
+# Creating a VideoCapture object and reading from input file
+video_capture = cv2.VideoCapture(0)
 
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_fullbody.xml")
+# Loading the cascades
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
+# Parameters
 detection = False
 detection_stopped_time = None
 timer_started = False
-SECONDS_TO_RECORD_AFTER_DETECTION = 5
-
-frame_size = (int(cap.get(3)), int(cap.get(4)))
+SECONDS_TO_RECORD_AFTER_DETECTION = 2
+frame_size = (int(video_capture.get(3)), int(video_capture.get(4)))
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
-while True:
-    _, frame = cap.read()
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+# Creating a face detector
+def detect(gray, frame):
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-    bodies = body_cascade.detectMultiScale(gray, 1.3, 5)
+    for (x, y, w, h) in faces:
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    return frame
 
-    if len(faces) + len(bodies) > 0:
+
+print("Press q to quit")
+while True:
+    _, frame = video_capture.read()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    canvas = detect(gray, frame)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+    cv2.imshow('Video', canvas)
+
+    if len(faces) > 0:
         if detection:
             timer_started = False
         else:
             detection = True
-            current_time = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
-            out = cv2.VideoWriter(f"{current_time}.mp4", fourcc, 20.0, frame_size)
+            # d = day, m = month, Y = year, H = hour, M = minute, S = second
+            current_time = datetime.datetime.now().strftime("%H-%M")
+            out = cv2.VideoWriter(
+                f"{current_time}.mp4", fourcc, 24.0, frame_size)
     elif detection:
         if timer_started:
             if time.time() - detection_stopped_time >= SECONDS_TO_RECORD_AFTER_DETECTION:
@@ -41,12 +58,10 @@ while True:
 
     if detection:
         out.write(frame)
-    
-    cv2.imshow("SecurityCamera", frame)
 
-    if cv2.waitKey(1) == ord('q'):
+    if cv2.waitKey(1) == ord('q'):  # Press q to quit
         break
 
 out.release()
-cap.release()
+video_capture.release()
 cv2.destroyAllWindows()
